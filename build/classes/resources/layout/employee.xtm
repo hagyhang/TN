@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/boostrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+<body>
+    <img src="home-icon.png">
+    <div>UCLN({{a}}, {{b}}) = {{result}}</div>
+
+    <script type="text/javascript" src="js/boostrap.min.js"></script>
+</body>
+</html>

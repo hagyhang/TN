@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/margin-padding.css">
+    <link rel="stylesheet" href="/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/angular.min.js"></script>
+
+</head>
+<body ng-app="myApp" ng-controller="myCtrl">
+    <div class="container-fluid">
+        <div class="header-wrap mt20">
+            <div class="header-content-right">
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle mr15" id="acc-dropdown" data-toggle="dropdown" aria-expanded="false"> 
+                        <i class="zmdi zmdi-account zmdi-hc-lg"></i> 
+                        <span class="hidden-sm hidden-xs ml5">Admin</span>
+                        <span class="caret"></span> 
+                    </a>
+                <ul class="dropdown-menu mt5 mr5 dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                  <li><a class="dropdown-item" href="#"><i class="zmdi zmdi-key mr5"></i>Key</a></li>
+                  <li><a class="dropdown-item" href="/login"><i class="zmdi zmdi-power mr5"></i>Logout</a></li>
+                </ul>
+                </div>
+            </div>
+        </div>
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item active">
+            <a class="nav-link active" id="users-tab" data-toggle="tab" href="#users" role="tab" aria-controls="users" aria-selected="true">User Management</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="pages-tab" data-toggle="tab" href="#pages" role="tab" aria-controls="pages" aria-selected="false">Page Management</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade active in" id="users" role="tabpanel" aria-labelledby="users-tab">
+              <div class="table-responsive">
+                <table class="table table-hover table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Full name</th>
+                    <th>Login name</th>
+                    <th>Password</th>
+                    <th>Rule</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="user in users">
+                    <td class="id-col">{{user.id}}</td>
+                    <td>{{user.fullName}}</td>
+                    <td>{{user.loginName}}</td>
+                    <td>{{user.password}}</td>
+                    <td>{{user.rule}}</td>
+                  </tr>
+                </tbody>
+                </table>
+              </div>
+          </div>
+          <div class="tab-pane fade" id="pages" role="tabpanel" aria-labelledby="pages-tab">
+            <div class="row">
+                <div class="m15 right">
+                  <a href="#popupAddLink" data-toggle="modal" class="btn btn-blue-border mr15">
+                    <span class=" zmdi zmdi-plus"></span>
+                    <span>Add</span>
+                   </a>
+                  <a ng-click="refresh()" class="btn btn-green-border">
+                    <span class=" zmdi zmdi-refresh"></span>
+                    <span>Refresh</span>
+                   </a>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Source</th>
+                    <th>Function</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="page in pages">
+                    <td class="id-col">{{page.id}}</td>
+                    <td>{{page.title}}</td>
+                    <td>{{page.pageSrc}}</td>
+                    <td>
+                        <a href="{{page.link}}" class="touch-link cursor-pointer" target="_blank">
+                            <i class="zmdi zmdi-open-in-new zmdi-hc-lg"></i>
+                        </a>
+                        <a ng-click="deletePage($event)" tag="{{page.id}}" class="touch-link cursor-pointer">
+                            <i tag="{{page.id}}" class="zmdi zmdi-delete zmdi-hc-lg text-danger"></i>
+                        </a>
+                    </td>
+                  </tr>
+                </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="popupAddLink">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    ADD LINK </div>
+                <div class="modal-body">
+                    <label class="title">Link:</label>
+                    <input class="form-control" type="text" ng-model="inputLinks">
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-3 col-xs-offset-6">
+                            <a class="btn btn-info w-100" data-dismiss="modal" ng-click="addLinks()">OK</a>
+                        </div>
+                        <div class="col-xs-3">
+                            <a class="btn btn-blue w-100" data-dismiss="modal">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/controller/admin.js"></script>
+</body>
+</html>
