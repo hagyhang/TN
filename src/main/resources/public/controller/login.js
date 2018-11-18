@@ -9,12 +9,14 @@ function ConfigToken(){
 	}
 }
 app.controller("loginCtrl", ($scope, $location, $http)=>{
+	// let baseUrl = 'http://localhost:5000';
+	let baseUrl = 'https://hagyhang.herokuapp.com';
 	$scope.email = "";
 	$scope.password = "";
 	$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 	let token = ConfigToken();
 	if (token != null){
-		window.location = "http://localhost:5000/dashboard"
+		window.location = baseUrl + "/dashboard"
 	}
 	$scope.SignUp = ()=>{
 		$location.path('/sign-up');
@@ -24,12 +26,12 @@ app.controller("loginCtrl", ($scope, $location, $http)=>{
 			name : $scope.email, //'phananh123qqq@gmail.com'
 			pass : $scope.password //'123123qqq'
 		}
-		$http.post("http://localhost:5000/login?name=" + $scope.email + "&" + "pass=" + $scope.password, user, ConfigToken()).then((res)=>{
+		$http.post(baseUrl + "/login?name=" + $scope.email + "&" + "pass=" + $scope.password, user, ConfigToken()).then((res)=>{
 			var data = res.data;
 			console.log(data)
 			if (data == true)
 			{
-				window.location = "http://localhost:5000/dashboard"
+				window.location = baseUrl + "/dashboard"
 			}
 		})
 	}
