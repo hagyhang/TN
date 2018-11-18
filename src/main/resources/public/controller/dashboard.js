@@ -37,8 +37,10 @@ function initMap() {
 }
 app.controller("dashCtrl", ($scope, $http)=>{
 	let map, markers, wayPoints = [], start, end;
-	let greedIcon = 'http://localhost:5000/images/green_bin_26x26.png';
-	let redIcon = 'http://localhost:5000/images/red_bin_26x26.png';
+	// let baseUrl = 'http://localhost:5000';
+	let baseUrl = 'https://hagyhang.herokuapp.com';
+	let greedIcon = baseUrl + '/images/green_bin_26x26.png';
+	let redIcon = baseUrl + '/images/red_bin_26x26.png';
 	setTimeout(function(){
 		let center = {lat: 10.794103, lng: 106.6979763}
 		markers=[];
@@ -47,7 +49,7 @@ app.controller("dashCtrl", ($scope, $http)=>{
 		  center: center,
 		  zoom: 17
 		});
-		$http.get("http://localhost:5000/bins").then((res)=>{
+		$http.get(baseUrl + "/bins").then((res)=>{
 			let bins = res.data;
 			start = new google.maps.LatLng(bins[0].lat, bins[0].lon);
 			end = new google.maps.LatLng(bins[bins.length-1].lat, bins[bins.length-1].lon);

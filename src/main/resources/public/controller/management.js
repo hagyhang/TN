@@ -29,17 +29,19 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	};
 	$scope.boxStyle;
 	let lon, lat, map, marker, isMark = false, isAddMode = true;
-	let greedIcon = 'http://localhost:5000/images/green_bin_26x26.png';
+	// let baseUrl = 'http://localhost:5000';
+	let baseUrl = 'https://hagyhang.herokuapp.com';
+	let greedIcon = baseUrl + '/images/green_bin_26x26.png';
 	$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 	let token = ConfigToken();
 	if (token != null){
-		window.location = "http://localhost:5000/management"
+		window.location = baseUrl + "/management"
 	}
 	loadBin()
 	$scope.deleteBin = (id)=>{
 		var r = confirm("Confirm delete this item!");
 		if (r == true) {
-			$http.delete("http://localhost:5000/bins?" + "id=" + id, ConfigToken()).then((res)=>{
+			$http.delete(baseUrl + "/bins?" + "id=" + id, ConfigToken()).then((res)=>{
 				loadBin();
 			})
 		}
@@ -88,7 +90,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	$scope.addBinOK = ()=>{
 		if (isAddMode){
 			if (isMark){
-				$http.post("http://localhost:5000/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status, ConfigToken()).then((res)=>{
+				$http.post(baseUrl + "/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status, ConfigToken()).then((res)=>{
 					console.log(res.data)
 					loadBin()
 				})
@@ -96,7 +98,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 				alert("Add fail, missing location!")
 			}
 		} else {
-		    $http.put("http://localhost:5000/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status + "&id=" + $scope.bin.id, ConfigToken()).then((res)=>{
+		    $http.put(baseUrl + "/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status + "&id=" + $scope.bin.id, ConfigToken()).then((res)=>{
 				console.log($scope.bin.id)
 				console.log(res.data)
 				loadBin()
@@ -140,7 +142,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		};
 	}
 	function loadBin(){
-		$http.get("http://localhost:5000/bins", ConfigToken()).then((res)=>{
+		$http.get("baseUrl + /bins", ConfigToken()).then((res)=>{
 			$scope.bins = res.data;
 			console.log($scope.bins)
 		});
