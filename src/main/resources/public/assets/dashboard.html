@@ -1,0 +1,28 @@
+<div id="wrapper" ng-controller="dashCtrl"> 
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar logo"> <a href="#"><img src="assets/images/logo_sidebar.svg" alt=""></a> </li>
+            <li class="parent"><a href="/#!/dashboard" data-toggle="collapse"><i class="zmdi zmdi-home zmdi-hc-lg"></i>MONITORING</a></li>
+            <li class="parent"><a href="/#!/statistic" data-toggle="collapse"><i class="zmdi zmdi-smartphone zmdi-hc-lg"></i>STATISTIC</a></li>
+            <li class="parent"><a href="/#!/management" data-toggle="collapse"><i class="zmdi zmdi-settings zmdi-hc-lg"></i>MANAGEMENT</a></li>
+            <div class="collapse sub-nav" id="submenu3">
+                <li><a href="#"><i class="zmdi zmdi-circle"></i>BIN</a></li>
+                <li><a href="#"><i class="zmdi zmdi-circle"></i>EMPLOYEE</a></li>
+            </div>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper --> 
+    
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div id="map"></div>
+        </div>
+    </div>
+    <script src="assets/js/map-api/map.js"></script> 
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBut76aU8KK1puDk_6VhcDdwMb6chJMnAs&callback=initMap"
+    async defer></script>
+    <!-- /#page-content-wrapper --> 
+</div>
