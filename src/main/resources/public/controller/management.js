@@ -142,7 +142,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		};
 	}
 	function loadBin(){
-		$http.get("baseUrl + /bins", ConfigToken()).then((res)=>{
+		$http.get(baseUrl + "/bins", ConfigToken()).then((res)=>{
 			$scope.bins = res.data;
 			console.log($scope.bins)
 		});
