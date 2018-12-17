@@ -21,18 +21,7 @@ public class DBConnector {
     private static String URL = "https://smartbin-892a5.firebaseio.com/";
     private DBConnector(){
     }
-    
-    public User getUser(String name, String pass) throws Exception{
-//        sendPost(URL, postParams);
-        JSONObject result;
-        String url = URL + "User/" + name + ".json";
-        String res = sendGet(url);
-        if (res == null) return null;
-        result = new JSONObject(res);
-        if (result != null && pass.equals(result.get("pass")))
-            return new User(name, res);
-        return null;
-    }
+
     
     public String sendGet (String url) throws Exception {
 

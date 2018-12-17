@@ -12,29 +12,66 @@
         <link rel="stylesheet" href="css/simple-sidebar.css">
         <link rel="stylesheet" href="css/material-design-iconic-font.min.css"> 
     </head>
-    <body ng-app="mainApp">
-        <div id="wrapper" ng-controller="dashCtrl"> 
-
+    <body ng-app="mainApp" ng-controller="dashCtrl">
+        <div id="wrapper"> 
             <!-- Sidebar -->
             <div id="sidebar-wrapper">
                 <ul class="sidebar-nav">
                     <li class="sidebar logo"> <a href="#"><img src="images/logo.png" class="main-logo" alt=""></a> </li>
                     <li><a href="dashboard"><i class="zmdi zmdi-home zmdi-hc-lg"></i>MONITORING</a></li>
                     <li><a href="statistic"><i class="zmdi zmdi-smartphone zmdi-hc-lg"></i>STATISTIC</a></li>
-                    <li class="parent"><a href="management"><i class="zmdi zmdi-settings zmdi-hc-lg"></i>MANAGEMENT</a></li>
+                    <li class="parent"><a href="#submenu3" data-toggle="collapse"><i class="zmdi zmdi-settings zmdi-hc-lg"></i>MANAGEMENT</a></li>
+                    <div class="collapse sub-nav" id="submenu3">
+                        <li><a href="management"><i class="zmdi zmdi-circle"></i>BIN</a></li>
+                        <li><a href="management_point"><i class="zmdi zmdi-circle"></i>END POINT</a></li>
+                        <li><a href="management_user"><i class="zmdi zmdi-circle"></i>USER</a></li>
+                    </div>
                 </ul>
             </div>
             <!-- /#sidebar-wrapper --> 
             
             <!-- Page Content -->
             <div id="page-content-wrapper">
-                <div class="container-fluid">
-                    <div id="map" class="mt20"></div>
-                    <a class="btn btn-green mt20" ng-click="findPath()">Find Path</a>
-                    <div id="directions-panel"></div>
+                <div class="container-fluid" ng-click="bodyClick()">
+<!--                     <div class="row mt20 mb10">
+                        <div class="col-sm-9">
+                            <div class="input-place">
+                                <label>WayPoints:</label>
+                                <p>{{listId}}</p>
+                            </div>
+                        </div>
+                        
+                    </div> -->
+                    <div class="row mt20 mb10">
+                        <!-- <div class="col-sm-6">
+                            <div class="input-place">
+                                <label>End Point:</label>
+                                <select class="form-control" ng-model="index" ng-click="pointSelected()">
+                                    <option ng-repeat="point in points" value="{{$index}}">
+                                        {{point.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div> -->
+                        <div class="col-sm-4">
+                            <a class="form-control btn btn-blue mt25" ng-click="allFull()">Choose all full bins</a>
+                        </div>
+                        <div class="col-sm-4">
+                            <a class="form-control btn btn-green mt25" ng-click="findPath()">Find Path</a>
+                        </div>
+                        <div class="col-sm-4">
+                            <a class="form-control btn btn-green mt25" ng-click="sendMail()">Send Mail</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dash-map" id="map" ng-right-click="rightClick($event)"></div>
+                    <div id="directions-panel" class="mt20"></div>
                 </div>
             </div>
             <!-- /#page-content-wrapper --> 
+        </div>
+        <div id="box" class="custom-box" ng-style="boxStyle" ng-click="boxClick()">
+            &nbsp;Add this
         </div>
     </body> 
     <script src="js/jquery.min.js"></script>

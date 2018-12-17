@@ -20,39 +20,38 @@ app.directive('ngRightClick', function($parse) {
 });
 app.controller("mainCtrl", ($scope, $location, $http)=>{
 	$scope.dashboardHref = "/dashboasrd";
-	$scope.bins;
-	$scope.bin = {
+	$scope.points;
+	$scope.point = {
 		lon: null,
 		lat: null,
-		status: null,
 		id: null
 	};
 	$scope.boxStyle;
 	let lon, lat, map, marker, isMark = false, isAddMode = true;
 	let baseUrl = 'http://localhost:5000';
 	// let baseUrl = 'https://hagyhang.herokuapp.com';
-	let greedIcon = baseUrl + '/images/green_bin_26x26.png';
+	let greedIcon = baseUrl + '/images/endpoint_26x26.png';
 	$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 	let token = ConfigToken();
 	if (token != null){
 		window.location = baseUrl + "/management"
 	}
-	loadBin()
-	$scope.deleteBin = (id)=>{
+	loadPoint()
+	$scope.delete = (id)=>{
 		var r = confirm("Confirm delete this item!");
 		if (r == true) {
-			$http.delete(baseUrl + "/bins?" + "id=" + id, ConfigToken()).then((res)=>{
-				loadBin();
+			$http.delete(baseUrl + "/point?" + "id=" + id, ConfigToken()).then((res)=>{
+				loadPoint();
 			})
 		}
 	}
-	$scope.updateBin = (bin)=>{
+	$scope.update= (point)=>{
 		isAddMode = false;
-		$scope.bin.lon = bin.lon;
-		$scope.bin.lat = bin.lat;
-		$scope.bin.status = bin.status;
-		$scope.bin.id = bin.id;
-		let center = {lat: bin.lat, lng: bin.lon};
+		$scope.point.id = point.id;
+		$scope.point.lon = point.lon;
+		$scope.point.lat = point.lat;
+		$scope.point.name = point.name;
+		let center = {lat: point.lat, lng: point.lon};
 		map = new google.maps.Map(document.getElementById('map'), {
 		  center: center,
 		  zoom: 17
@@ -61,15 +60,14 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		  	position: center,
 		  	map: map,
 		  	icon : greedIcon,
-		  	title: 'Bin'
+		  	title: 'point'
 		})
 		map.addListener('rightclick', function(event) {
 			lon = event.latLng.lng();
 			lat = event.latLng.lat();
 		});
-		console.log($scope.bin.status)
 	}
-	$scope.addBin = ()=>{
+	$scope.add = ()=>{
 		isAddMode = true;
 		let center = {lat: 10.794103, lng: 106.6979763}
 		map = new google.maps.Map(document.getElementById('map'), {
@@ -80,36 +78,36 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		  	position: center,
 		  	map: null,
 		  	icon : greedIcon,
-		  	title: 'Bin'
+		  	title: 'point'
 		})
 		map.addListener('rightclick', function(event) {
 			lon = event.latLng.lng();
 			lat = event.latLng.lat();
 		});
 	}
-	$scope.addBinOK = ()=>{
+	$scope.OK = ()=>{
 		if (isAddMode){
 			if (isMark){
-				$http.post(baseUrl + "/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status, ConfigToken()).then((res)=>{
+				$http.post(baseUrl + "/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
 					console.log(res.data)
-					loadBin()
+					loadPoint()
 				})
 			} else {
 				alert("Add fail, missing location!")
 			}
 		} else {
-		    $http.put(baseUrl + "/bins?lon=" + $scope.bin.lon + "&lat=" + $scope.bin.lat + "&status=" + $scope.bin.status + "&id=" + $scope.bin.id, ConfigToken()).then((res)=>{
-				console.log($scope.bin.id)
+		    $http.put(baseUrl + "/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat  + "&id=" + $scope.point.id + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
+				console.log($scope.point.id)
 				console.log(res.data)
-				loadBin()
+				loadPoint()
 			})
 		}
 	}
 	$scope.rightClick = (e)=>{	
 		$scope.boxStyle  = {
 			visibility: "visible",
-			left: e.x + "px",
-			top: e.y + "px"
+			left: e.pageX + "px",
+			top: e.pageY + "px"
 		};
 	}
 	$scope.bodyClick = ()=>{
@@ -118,8 +116,8 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		}
 	}
 	$scope.boxClick = ()=>{
-		$scope.bin.lon = lon;
-		$scope.bin.lat = lat;
+		$scope.point.lon = lon;
+		$scope.point.lat = lat;
 		$scope.boxStyle  = {
 			visibility: "collapse"
 		}
@@ -128,23 +126,22 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		  	position: {lat: lat, lng: lon},
 		  	map: map,
 		  	icon : greedIcon,
-		  	title: 'Bin'
+		  	title: 'point'
 		})
 		marker.setMap(map);
 		isMark = true;
 	}
 	$scope.closePopup = ()=>{
-		$scope.bin = {
+		$scope.point = {
 			lon: null,
 			lat: null,
-			status: null,
 			id: null
 		};
 	}
-	function loadBin(){
-		$http.get(baseUrl + "/bins", ConfigToken()).then((res)=>{
-			$scope.bins = res.data;
-			console.log($scope.bins)
+	function loadPoint(){
+		$http.get(baseUrl + "/point", ConfigToken()).then((res)=>{
+			$scope.points = res.data;
+			console.log($scope.points)
 		});
 	}
 })

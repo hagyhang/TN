@@ -1,28 +1,5 @@
 var app = angular.module("mainApp", ["ngRoute"]);
 var currentUser;
-var backLocation="/";
-// app.config(($routeProvider)=>{
-// 	$routeProvider
-// 	.when("/", {
-// 		templateUrl : "login.html"
-// 	})
-// 	.when("/sign-up", {
-// 		templateUrl : "sign-up.html"
-// 	})
-// 	// .when("/dashboard", {
-// 	// 	templateUrl : "dashboard.html"
-// 	// })
-// 	// .when("/management", {
-// 	// 	templateUrl : "management.html"
-// 	// })
-// 	// .when("/statistic", {
-// 	// 	templateUrl : "statistic.html"
-// 	// })
-// 	.otherwise({
-// 		redirectTo: "/"
-// 	});
-// });
-
 
 function ConfigToken(){
 	if(window.localStorage.getItem("FOOD_TOKEN") == null) return null;
@@ -35,45 +12,135 @@ function ConfigToken(){
 function initMap() {
 
 }
+app.directive('ngRightClick', function($parse) {
+    return function(scope, element, attrs) {
+        var fn = $parse(attrs.ngRightClick);
+        element.bind('contextmenu', function(event) {
+            scope.$apply(function() {
+                event.preventDefault();
+                fn(scope, {$event:event});
+            });
+        });
+    };
+});
 app.controller("dashCtrl", ($scope, $http)=>{
-	let map, markers, wayPoints = [], start, end;
-	// let baseUrl = 'http://localhost:5000';
-	let baseUrl = 'https://hagyhang.herokuapp.com';
-	let greedIcon = baseUrl + '/images/green_bin_26x26.png';
-	let redIcon = baseUrl + '/images/red_bin_26x26.png';
+	$scope.points;
+	$scope.bins=[];
+	$scope.bin;
+	$scope.index="";
+	$scope.listId=".";
+	$scope.boxStyle;
+	let map, markers=[], endPoints=[], waypointsIndex=[];
+	let start, lon, lat, marker, isStartSet = false, isEndSet = false, listId=[], endPointId=-1;
+	let maxX = -1000, maxY = -1000, minX = 1000, minY = 1000;
+	let baseUrl = 'http://localhost:5000';
+	// let baseUrl = 'https://hagyhang.herokuapp.com';
+	let greedIcon = '/images/green_bin_26x26.png';
+	let redIcon = '/images/red_bin_26x26.png';
+	let greedIconChoosed = '/images/green_bin_choosed_26x26.png';
+	let redIconChoosed = '/images/red_bin_choosed_26x26.png';
+	let startIcon = '/images/start_26x26.jpg';
+	let endIcon = '/images/endpoint_56x40.png';
+	let endIconChoosed = '/images/endpoint_choosed_56x40.png';
 	setTimeout(function(){
 		let center = {lat: 10.794103, lng: 106.6979763}
-		markers=[];
-		wayPoints=[];
 		map = new google.maps.Map(document.getElementById('map'), {
 		  center: center,
-		  zoom: 17
+		  zoom: 15
 		});
-		$http.get(baseUrl + "/bins").then((res)=>{
-			let bins = res.data;
-			start = new google.maps.LatLng(bins[0].lat, bins[0].lon);
-			end = new google.maps.LatLng(bins[bins.length-1].lat, bins[bins.length-1].lon);
-			for (let i=0; i<bins.length; i++){
-				let bin = bins[i];				
+		map.addListener('rightclick', function(event) {
+			lon = event.latLng.lng();
+			lat = event.latLng.lat();
+		});
+		marker = new google.maps.Marker({
+		  	position: center,
+		  	map: null,
+		  	icon : startIcon,
+		  	title: 'Start Point'
+		})
+		$http.get("/path").then((res)=>{
+			$scope.bins = res.data.bins;
+			$scope.points = res.data.points;
+			for (let i=0; i<$scope.bins .length; i++){
+				let bin = $scope.bins [i];				
 				let marker = new google.maps.Marker({
 			      position: {lat: bin.lat, lng: bin.lon},
 			      map: map,
 			      icon : greedIcon,
-			      title: 'Bin'
+			      title: i + ""
 			    })
-			    if(bin.status != true)
+			    if(bin.status != true){
 			    	marker.icon = redIcon;
+			    	let point = new google.maps.LatLng(bin.lat, bin.lon);
+			    	// console.log ("lon: " + bin.lon + " - lat: " + bin.lat);
+				    // wayPoints.push({
+				    //     location: point,
+				    //     stopover: true
+				    // });
+				    waypointsIndex.push(i);
+			    }
 			    markers.push(marker);
-			    let point = new google.maps.LatLng(bin.lat, bin.lon);
-			    wayPoints.push({
-			        location: point,
-			        stopover: true
-			    });
+			    maxX = maxX > bin.lat ? maxX : bin.lat;
+			    maxY = maxY > bin.lon ? maxY : bin.lon;
+			    minX = minX < bin.lat ? minX : bin.lat;
+			    minY = minY < bin.lon ? minY : bin.lon;
+			    
+			    marker.addListener('click', function() {
+			    	markerIndex = this.title;
+			    	let isAdd = true;
+			    	for (let i=0; i<listId.length; i++){
+			    		if (listId[i] == markerIndex){
+			    			isAdd = false;
+			    			listId.splice(i, 1);
+			    			if ($scope.bins[markerIndex].status == true)
+			    				this.setIcon(greedIcon);
+			    			else 
+			    				this.setIcon(redIcon);
+			    			break;
+			    		}
+			    	}
+			    	if (isAdd == true){
+			    		if ($scope.bins[markerIndex].status == true)
+			    			this.setIcon(greedIconChoosed);
+			    		else 
+			    			this.setIcon(redIconChoosed);
+						listId.push(markerIndex);
+			    	}
+					updateListId();
+				});
 			}
-			console.log("???/");
-			console.log(wayPoints);
+			for (let i=0; i<$scope.points.length; i++){
+				let p = $scope.points[i];				
+				let marker = new google.maps.Marker({
+			      position: {lat: p.lat, lng: p.lon},
+			      map: map,
+			      icon : endIcon,
+			      title: p.name,
+			      index : i
+			    });
+			    marker.addListener('click', function() {
+			    	markerIndex = this.index;
+			    	if (markerIndex == endPointId){
+			    		this.setIcon(endIcon);
+			    		endPointId = -1;
+			    	} else {
+			    		this.setIcon(endIconChoosed);
+			    		if (endPointId != -1)
+			    			endPoints[endPointId].setIcon(endIcon);
+			    		endPointId = markerIndex;
+			    	}
+				});
+			    endPoints.push(marker);
+			    maxX = maxX > p.lat ? maxX : p.lat;
+			    maxY = maxY > p.lon ? maxY : p.lon;
+			    minX = minX < p.lat ? minX : p.lat;
+			    minY = minY < p.lon ? minY : p.lon;
+			}
+			center = new google.maps.LatLng((maxX + minX)/2, (maxY + minY)/2);
+		    map.panTo(center);
+			// console.log(wayPoints);
 		})
-	 	
+	 	// console.log(markers);
 	  //   setInterval(function(){
 	  //   	$http.get("http://localhost:5000/bins").then((res)=>{
 			// 	let bins = res.data;
@@ -94,20 +161,77 @@ app.controller("dashCtrl", ($scope, $http)=>{
 			// })
 	  //   }, 2000);
 	}, 1000);
+	function updateListId(){
+		let str = "";
+		for (let i=0; i<listId.length; i++){
+			if (i==0)
+				str += $scope.bins[listId[i]].id;
+			else 
+				str += "; " + $scope.bins[listId[i]].id;
+		}
+		$scope.listId = str;
+	}
+	$scope.allFull = ()=>{
+		let list = waypointsIndex.slice();
+		listId = list;
+		for (let i=0; i<$scope.bins.length; i++){
+			if ($scope.bins[i].status == true)
+				markers[i].setIcon(greedIcon);
+			else 
+				markers[i].setIcon(redIcon);
+		}
+		for (let i=0; i<listId.length; i++){
+			if ($scope.bins[listId[i]].status == true)
+				markers[listId[i]].setIcon(greedIconChoosed);
+			else 
+				markers[listId[i]].setIcon(redIconChoosed);
+		}
+		updateListId();
+	}
+	// $scope.pointSelected = ()=>{
+	// 	console.log($scope.index);
+	// 	if ($scope.index != ""){
+	// 		point = $scope.points[$scope.index];
+	// 		end = new google.maps.LatLng(point.lat, point.lon);
+	// 		isEndSet = true;
+	// 	}	
+	// }
+	let directionsDisplay;
 	$scope.findPath = ()=>{
+		if (listId.length==0 || !isStartSet || endPointId == -1){
+			alert("Choose Waypoints, Start Point and End Point by click on map!")
+			return;
+		}
+		let wayPoints=[];
+		for (let i=0; i<listId.length; i++){
+			let bin = $scope.bins[listId[i]];
+			let point = new google.maps.LatLng(bin.lat, bin.lon);
+		    wayPoints.push({
+		        location: point,
+		        stopover: true
+		    });
+		}
+		let temp = $scope.points[endPointId];
+		let end = new google.maps.LatLng(temp.lat, temp.lon);
+
+		if (directionsDisplay != null){
+			directionsDisplay.setMap(null);
+		}
 		let directionsService = new google.maps.DirectionsService;
-        let directionsDisplay = new google.maps.DirectionsRenderer;
-        console.log(wayPoints);
+        directionsDisplay = new google.maps.DirectionsRenderer;
+        // console.log(wayPoints);
         directionsDisplay.setMap(map); 
         directionsService.route({
           origin: start,
           destination: end,
           waypoints: wayPoints,
           optimizeWaypoints: true,
-          travelMode: 'DRIVING'
+          avoidHighways: true,
+          travelMode: 'WALKING'
         }, function(response, status) {
           if (status === 'OK') {
             directionsDisplay.setDirections(response);
+            // console.log(response);
             var route = response.routes[0];
             var summaryPanel = document.getElementById('directions-panel');
             summaryPanel.innerHTML = '';
@@ -125,184 +249,45 @@ app.controller("dashCtrl", ($scope, $http)=>{
           }
         });
 	}
+	$scope.sendMail = ()=>{
+		if (listId.length==0 || !isStartSet || endPointId == -1){
+			alert("Choose Waypoints, Start Point and End Point by click on map!")
+			return;
+		}
+		let data = [];
+		for (let i=0; i<listId.length; i++){
+			let bin = $scope.bins[listId[i]];
+			data.push(bin.id);
+		}
+		$http.post("/path", data).then((res)=>{
+
+		});
+	}
+	$scope.rightClick = (e)=>{	
+		$scope.boxStyle  = {
+			visibility: "visible",
+			left: e.pageX + "px",
+			top: e.pageY + "px"
+		};
+	}
+	$scope.bodyClick = ()=>{
+		$scope.boxStyle  = {
+			visibility: "collapse"
+		}
+	}
+	$scope.boxClick = ()=>{
+		$scope.boxStyle  = {
+			visibility: "collapse"
+		}
+		marker.setMap(null);
+		marker = new google.maps.Marker({
+		  	position: {lat: lat, lng: lon},
+		  	map: map,
+		  	icon : startIcon,
+		  	title: 'point'
+		})
+		marker.setMap(map);
+		start = new google.maps.LatLng(lat, lon);
+		isStartSet = true;
+	}
 })
-
-// app.controller("signUpCtrl", ($scope, $location, $http)=>{
-// 	$scope.submit = ()=>{
-// 		var user={
-// 			email : $scope.email,
-// 			password : $scope.password,
-// 			fullName : $scope.fullName
-// 		};
-		
-// 		$http.post("https://cookbook-server.herokuapp.com/users/register", user).then((res)=>{
-// 			var data = res.data;
-// 			if (data == true)
-// 			{
-// 				console.log("Tạo thành công!");
-// 				$location.path('/');
-// 			}
-// 		})
-// 	}
-// })
-
-// app.controller("foodCtrl", ($scope, $location, $http)=>{
-// 	$scope.currentPath = $location.$$path;
-// 	$scope.isDel = "collapseDel";
-// 	$http.get("https://cookbook-server.herokuapp.com" + $scope.currentPath + "/detail", ConfigToken()).then((res)=>{
-// 		var data = res.data;
-// 		if (data.success == true){
-// 			$scope.food = data.results;
-// 			if ($scope.food.createBy == currentUser){
-// 				$scope.isDel = "visibleDel";
-// 			}
-// 		}
-// 		else {
-// 			$location.path("/");
-// 		}
-// 	})
-// 	$scope.Logout = ()=>{
-// 		window.localStorage.clear();
-// 		$location.path("/");
-// 	}
-// 	$scope.AddFood = ()=>{
-// 		$location.path("/add-food");
-// 		backLocation = $scope.currentPath;
-// 	}
-// 	$scope.DelFood = ()=>{
-// 		if (confirm("Bạn có chắc xóa bài viết này?")) {
-// 			$http.post("https://cookbook-server.herokuapp.com" + $scope.currentPath + "/delete",{}, ConfigToken()).then((res)=>{
-// 				var data = res.data;
-// 				if (data.success == true){
-// 					$scope.food = data.results;
-// 					console.log(data);
-// 					alert("Đã xóa");
-// 					$location.path("/");
-// 				}
-// 			})
-// 	    } 
-// 	}
-// })
-
-// app.controller("addFoods", ($scope, $location, $http) => {
-// 	$scope.Back = ()=>{
-// 		$location.path(backLocation);
-// 	}
-// 	$scope.Logout = ()=>{
-// 		window.localStorage.clear();
-// 		$location.path("/");
-// 	}
-// 	$scope.uploadSubImage = function(e){
-// 		var i = e.attributes['tag'].value;
-// 		var f = document.getElementById('file'+i).files[0];
-// 		var fd = new FormData();
-// 		fd.append("file", f);
-// 		// console.log("file" + f);
-// 		$http({
-// 	        url: "https://cookbook-server.herokuapp.com/image/",
-// 	        method: 'POST',
-// 	        data: fd,
-// 	        headers: { 'Content-Type': undefined, Token: window.localStorage.getItem("FOOD_TOKEN")},
-// 	    }).then((res)=>{
-// 			var data = res.data;
-// 			if (data.success == true)
-// 			{
-// 				let path = "https://cookbook-server.herokuapp.com/" + data.results.path;
-// 				var img = angular.element(document.querySelector('#img'+i));
-// 				img.attr('src', path);
-// 				$scope.food.content[i].arrImage.push({image: path});
-// 	        	console.log(angular.element(e));
-// 	        	angular.element(e).val(null);
-// 			}
-// 		});
-//     };
-// 	$scope.uploadImage = function() {
-// 	    var f = document.getElementById('file').files[0];
-// 	    // console.log(f);
-//         var fd = new FormData();
-// 			fd.append("file", f);
-
-// 		$http({
-// 	        url: "https://cookbook-server.herokuapp.com/image/",
-// 	        method: 'POST',
-// 	        data: fd,
-// 	        headers: { 'Content-Type': undefined, Token: window.localStorage.getItem("FOOD_TOKEN")},
-// 	    }).then((res)=>{
-// 			var data = res.data;
-// 			if (data.success == true)
-// 			{
-// 				let path = "https://cookbook-server.herokuapp.com/" + data.results.path;
-// 				$scope.food.image = path;
-// 				var i = angular.element(document.querySelector('#img'));
-// 				i.attr('src', path);
-// 				i.attr('class', 'food-image center-block');
-// 				console.log(path);
-// 			}
-// 		});
-// 	}
-
-// 	$scope.add = function(){
-// 		var materials = $scope.materials.split(";")
-// 		if ($scope.materials != "" && $scope.food.name != "" && $scope.food.decriptions != "" && $scope.food.content.length > 0)
-// 		{
-// 			materials.forEach((m)=>{
-// 				var ss = m.split(":");
-// 				var temp = {
-// 					material: ss[0],
-// 					amount: ss[1]
-// 				}
-// 				$scope.food.materials.push(temp);
-// 				console.log($scope.food.name);
-// 				// console.log($scope.food.materials); //amazing !!!!!
-// 			})
-// 			var selector = document.getElementById("selector");
-// 			$scope.food.categoryId = selector.options[ selector.selectedIndex ].value;
-// 			console.log(selector.options[selector.selectedIndex ].value);
-// 			console.log($scope.food);
-// 			$http.post("https://cookbook-server.herokuapp.com/food/" + $scope.food.categoryId + "/create", $scope.food, ConfigToken()).then((res)=>{
-// 				var data = res.data;
-// 				if (data.success == true){
-// 					console.log(data.results);
-// 					alert("Thêm thành công!");
-// 					$location.path('/dashboard');
-// 				}
-// 			})
-// 		}
-// 		else alert ("Bạn phải nhập đủ thông tin có dấu *");
-// 	}
-// 	$scope.delStep = function(i){
-// 		console.log($scope.food.content);
-// 		$scope.food.content.splice(i, 1);
-// 	}
-// 	$scope.addStep = function(i){
-// 		var emptyStep = {
-// 			"step": "",
-// 			"arrImage": []
-// 		}
-// 		$scope.food.content.push(emptyStep);
-// 		console.log($scope.food.content);
-// 	}
-// 	$http.get("https://cookbook-server.herokuapp.com/category", ConfigToken()).then((res)=>{
-// 		var data = res.data;
-// 		if (data.success == true){
-// 			$scope.categories = data.results;
-// 		}
-// 	})
-// 	$scope.food={};
-// 	$scope.food.favourite=[];//
-// 	$scope.food.name="";
-// 	$scope.food.categoryId=[];//
-// 	$scope.food.materials=[];
-// 	$scope.materials="";
-// 	$scope.food.content = [];
-// })
-
-// app.directive('customOnChange', function() {
-//   return {
-//     restrict: 'A',
-//     link: function (scope, element, attrs) {
-//       var onChangeFunc = scope.$eval(attrs.customOnChange);
-//       element.bind('change', onChangeFunc);
-//     }
-//   };
-// });

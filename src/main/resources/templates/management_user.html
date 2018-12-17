@@ -1,0 +1,216 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+         <script src="js/angular.js"></script>
+        <script src="js/angular-route.js"></script>
+        <script src="controller/management_user.js"></script>
+        
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/margin-padding.css">
+        <link rel="stylesheet" href="css/simple-sidebar.css">
+        <link rel="stylesheet" href="css/material-design-iconic-font.min.css"> 
+    </head>
+    <body ng-app="mainApp" ng-controller="mainCtrl">
+        <div id="wrapper"> 
+            <!-- Sidebar -->
+            <div id="sidebar-wrapper">
+                <ul class="sidebar-nav">
+                    <li class="sidebar logo"> <a href="#"><img src="images/logo.png" class="main-logo" alt=""></a> </li>
+                    <li><a href="dashboard"><i class="zmdi zmdi-home zmdi-hc-lg"></i>MONITORING</a></li>
+                    <li><a href="statistic"><i class="zmdi zmdi-smartphone zmdi-hc-lg"></i>STATISTIC</a></li>
+                    <li class="parent"><a href="#submenu3" data-toggle="collapse"><i class="zmdi zmdi-settings zmdi-hc-lg"></i>MANAGEMENT</a></li>
+                    <div class="collapse sub-nav" id="submenu3">
+                        <li><a href="management"><i class="zmdi zmdi-circle"></i>BIN</a></li>
+                        <li><a href="management_point"><i class="zmdi zmdi-circle"></i>END POINT</a></li>
+                        <li><a href="management_user"><i class="zmdi zmdi-circle"></i>USER</a></li>
+                    </div>
+                </ul>
+            </div>
+            <!-- /#sidebar-wrapper --> 
+            
+            <!-- Page Content -->
+            <div id="page-content-wrapper">
+                <div class="container-fluid">
+    	          <div class="row">
+		            <div class="col-xs-12 mb15 mt50">
+		              <a ng-click="add()" href="#popupAdd" data-toggle="modal" class="touch-link btn btn-blue-border mr15">
+		                <span class=" zmdi zmdi-plus"></span>
+		                <span>Thêm</span>
+		               </a>
+		            </div>
+		          </div>
+
+		          <div class="table-responsive">
+		            <table class="table table-hover table-striped">
+			            <thead>
+			              <tr>
+			                <th>ID</th>
+			                <th>name</th>
+			                <th>email</th>
+			                <th>address</th>
+			                <th>type</th>
+			                <th></th>
+			              </tr>
+			            </thead>
+			            <tbody>
+			              <tr ng-repeat="user in users">
+			                <td>{{user.id}}</td>
+			                <td>{{user.name}}</td>
+			                <td>{{user.email}}</td>
+			                <td>{{user.address}}</td>
+			                <td>{{user.type}}</td>
+			                <td>
+			                	<a class="mini-button" ng-click="update(user)" href="#popupUpdate" data-toggle="modal">
+			                		<i class="zmdi zmdi-edit zmdi-hc-lg"></i>
+			                	</a>
+			                	<a class="mini-button" ng-click="delete(user.id)">
+			                		<i class="zmdi zmdi-delete zmdi-hc-lg text-danger"></i>
+			                	</a>
+			                </td>
+			              </tr>
+			            </tbody>
+		            </table>
+		          </div>
+                </div>
+            </div>
+            <!-- /#page-content-wrapper --> 
+        </div>
+        
+		<div class="modal fade" tabindex="-1" role="dialog" id="popupAdd">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <a class="close" ng-click="closePopup()" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
+		                ADD USER </div>
+		            <div class="modal-body">
+		                <div class="row mb10">
+		                  	<div class="col-sm-4">
+				               	<div class="input-place">
+				                  	<label>ID:</label>
+				                  	<input class="form-control" type="text" name="content-text-box" ng-model="user.id">
+				               	</div>
+			              	</div>
+		                  	<div class="col-sm-4">
+				                <div class="input-place">
+				                  	<label>Name:</label>
+				                 	<input class="form-control" type="text" name="content-text-box" ng-model="user.name">
+				                </div>
+			              	</div>
+  			             	<div class="col-sm-4">
+				                <div class="input-place">
+				                	<label>Pass:</label>
+				                  	<input class="form-control" type="password" name="content-text-box" ng-model="user.pass">
+				                </div>
+			              	</div>
+		             	</div>
+  		                <div class="row mb10">
+		                    <div class="col-sm-4">
+				                <div class="input-place">
+				                  <label>Email:</label>
+				                  <input class="form-control" type="text" name="content-text-box" ng-model="user.email">
+				                </div>
+			              	</div>
+		                  <div class="col-sm-4">
+			                <div class="input-place">
+			                  <label>Address:</label>
+			                  <input class="form-control" type="text" name="content-text-box" ng-model="user.address">
+			                </div>
+			              </div>
+			              <div class="col-sm-4">
+		                    	<div class="input-place">
+			                        <label>Type:</label>
+		                            <select class="form-control" ng-model="user.type">
+		                                <option value="true">EMPLOYEE</option>
+		                                <option value="false">MANAGER</option>
+		                            </select>
+		                    	</div>
+		                    </div>
+		                </div>
+		            </div>
+	                <div class="modal-footer">
+		                <div class="row">
+		                    <div class="col-xs-3 col-xs-offset-9">
+		                        <button class="btn btn-blue w-100" ng-click="OK()" data-dismiss="modal" >OK</button>
+		                    </div>
+		                </div>
+		            </div>
+	            </div>
+		            
+	        </div>
+		        <!-- /.modal-content --> 
+	    </div>
+		<div class="modal fade" tabindex="-1" role="dialog" id="popupUpdate">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <a class="close" ng-click="closePopup()" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
+		                ADD USER </div>
+		            <div class="modal-body">
+		                <div class="row mb10">
+		                  	<div class="col-sm-4">
+				               	<div class="input-place">
+				                  	<label>ID:</label>
+				                  	<input class="form-control" type="text" name="content-text-box" value="{{user.id}}" disabled>
+				               	</div>
+			              	</div>
+		                  	<div class="col-sm-4">
+				                <div class="input-place">
+				                  	<label>Name:</label>
+				                 	<input class="form-control" type="text" name="content-text-box" value="{{user.name}}">
+				                </div>
+			              	</div>
+  			             	<div class="col-sm-4">
+				                <div class="input-place">
+				                	<label>Pass:</label>
+				                  	<input class="form-control" type="password" name="content-text-box" value="{{user.pass}}">
+				                </div>
+			              	</div>
+		             	</div>
+  		                <div class="row mb10">
+		                    <div class="col-sm-4">
+				                <div class="input-place">
+				                  <label>Email:</label>
+				                  <input class="form-control" type="text" name="content-text-box" value="{{user.email}}">
+				                </div>
+			              	</div>
+		                  <div class="col-sm-4">
+			                <div class="input-place">
+			                  <label>Address:</label>
+			                  <input class="form-control" type="text" name="content-text-box" value="{{user.address}}">
+			                </div>
+			              </div>
+			              <div class="col-sm-4">
+		                    	<div class="input-place">
+			                        <label>Type:</label>
+		                            <select class="form-control" ng-model="user.type">
+		                                <option value="true">EMPLOYEE</option>
+		                                <option value="false">MANAGER</option>
+		                            </select>
+		                    	</div>
+		                    </div>
+		                </div>
+		            </div>
+	                <div class="modal-footer">
+		                <div class="row">
+		                    <div class="col-xs-3 col-xs-offset-9">
+		                        <button class="btn btn-blue w-100" ng-click="updateBinOK()" data-dismiss="modal" >OK</button>
+		                    </div>
+		                </div>
+		            </div>
+	            </div>
+		            
+	        </div>
+		        <!-- /.modal-content --> 
+	    </div>
+		    <!-- /.modal-dialog --> 
+	</div>
+    </body> 
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/default.js"></script>  
+    <script src="js/simple-sidebar.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBut76aU8KK1puDk_6VhcDdwMb6chJMnAs&callback="
+    async defer></script>
+</html>

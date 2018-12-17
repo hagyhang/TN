@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
          <script src="js/angular.js"></script>
         <script src="js/angular-route.js"></script>
-        <script src="controller/management.js"></script>
+        <script src="controller/management_point.js"></script>
         
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -35,7 +35,7 @@
                 <div class="container-fluid">
     	          <div class="row">
 		            <div class="col-xs-12 mb15 mt50">
-		              <a ng-click="addBin()" href="#popupAdd" data-toggle="modal" class="touch-link btn btn-blue-border mr15">
+		              <a ng-click="add()" href="#popupAdd" data-toggle="modal" class="touch-link btn btn-blue-border mr15">
 		                <span class=" zmdi zmdi-plus"></span>
 		                <span>Thêm</span>
 		               </a>
@@ -49,21 +49,21 @@
 			                <th>ID</th>
 			                <th>Longitude</th>
 			                <th>Latitude</th>
-			                <th>Status</th>
+			                <th>Name</th>
 			                <th></th>
 			              </tr>
 			            </thead>
 			            <tbody>
-			              <tr ng-repeat="bin in bins">
-			                <td>{{bin.id}}</td>
-			                <td>{{bin.lon}}</td>
-			                <td>{{bin.lat}}</td>
-			                <td>{{bin.status}}</td>
+			              <tr ng-repeat="point in points">
+			                <td>{{point.id}}</td>
+			                <td>{{point.lon}}</td>
+			                <td>{{point.lat}}</td>
+			                <td>{{point.name}}</td>
 			                <td>
-			                	<a class="mini-button" ng-click="updateBin(bin)" href="#popupAdd" data-toggle="modal">
+			                	<a class="mini-button" ng-click="update(point)" href="#popupAdd" data-toggle="modal">
 			                		<i class="zmdi zmdi-edit zmdi-hc-lg"></i>
 			                	</a>
-			                	<a class="mini-button" ng-click="deleteBin(bin.id)">
+			                	<a class="mini-button" ng-click="delete(point.id)">
 			                		<i class="zmdi zmdi-delete zmdi-hc-lg text-danger"></i>
 			                	</a>
 			                </td>
@@ -81,28 +81,25 @@
 		        <div class="modal-content">
 		            <div class="modal-header">
 		                <a class="close" ng-click="closePopup()" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></a>
-		                ADD BIN </div>
+		                ADD END POINT </div>
 		            <div class="modal-body">
 		                <div class="row mb10">
-		                    <div class="col-sm-4">
-		                    	<div class="input-place">
-			                        <label>Status:</label>
-		                            <select class="form-control" ng-model="bin.status">
-		                                <option value="true">true</option>
-		                                <option value="false">false</option>
-		                            </select>
-		                    	</div>
-		                    </div>
-		                    <div class="col-sm-4">
+		                	<div class="col-sm-12">
+				                <div class="input-place">
+				                  <label>Name:</label>
+				                  <input class="form-control" type="text" name="content-text-box" ng-model="point.name">
+				                </div>
+			              	</div>
+		                    <div class="col-sm-6">
 				                <div class="input-place">
 				                  <label>Longitude:</label>
-				                  <input class="form-control" type="text" placeholder="Place on map!" name="content-text-box" disabled value="{{bin.lon}}">
+				                  <input class="form-control" type="text" placeholder="Place on map!" name="content-text-box" disabled value="{{point.lon}}">
 				                </div>
-				              </div>
-		                  <div class="col-sm-4">
+			              	</div>
+		                  <div class="col-sm-6">
 			                <div class="input-place">
 			                  <label>Latitude:</label>
-			                  <input class="form-control" type="text" placeholder="Place on map!" name="content-text-box" disabled value="{{bin.lat}}">
+			                  <input class="form-control" type="text" placeholder="Place on map!" name="content-text-box" disabled value="{{point.lat}}">
 			                </div>
 			              </div>
 		                </div>
@@ -112,7 +109,7 @@
 		            <div class="modal-footer">
 		                <div class="row">
 		                    <div class="col-xs-3 col-xs-offset-9">
-		                        <button class="btn btn-blue w-100" ng-click="addBinOK()" data-dismiss="modal" >OK</button>
+		                        <button class="btn btn-blue w-100" ng-click="OK()" data-dismiss="modal" >OK</button>
 		                    </div>
 		                </div>
 		            </div>

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+     <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/highcharts.js"></script>
+    <script src="js/exporting.js"></script>
+    <script src="controller/statistic.js"></script>
+    
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/margin-padding.css">
+    <link rel="stylesheet" href="css/simple-sidebar.css">
+    <link rel="stylesheet" href="css/material-design-iconic-font.min.css"> 
+</head>
+<body ng-app="mainApp">
+<div id="wrapper" ng-controller="mainCtrl"> 
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar logo"> <a href="#"><img src="images/logo.png" class="main-logo" alt=""></a> </li>
+            <li><a href="dashboard"><i class="zmdi zmdi-home zmdi-hc-lg"></i>MONITORING</a></li>
+            <li><a href="statistic"><i class="zmdi zmdi-smartphone zmdi-hc-lg"></i>STATISTIC</a></li>
+            <li class="parent"><a href="#submenu3" data-toggle="collapse"><i class="zmdi zmdi-settings zmdi-hc-lg"></i>MANAGEMENT</a></li>
+            <div class="collapse sub-nav" id="submenu3">
+                <li><a href="management"><i class="zmdi zmdi-circle"></i>BIN</a></li>
+                <li><a href="management_point"><i class="zmdi zmdi-circle"></i>END POINT</a></li>
+                <li><a href="management_user"><i class="zmdi zmdi-circle"></i>USER</a></li>
+            </div>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper --> 
+    
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="mt20 mr20" id="chart"></div>
+        </div>
+    </div>
+    <!-- /#page-content-wrapper --> 
+</div>
+</body> 
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/default.js"></script>  
+<script src="js/simple-sidebar.js"></script>
+</html>

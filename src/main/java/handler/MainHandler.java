@@ -8,6 +8,8 @@ package handler;
 import com.google.gson.Gson;
 import database.DBConnector;
 import enities.Bin;
+import enities.EndPoint;
+import enities.Path;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,15 +22,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import enities.User;
+import io.jsonwebtoken.Claims;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.BinModel;
+import model.EndPointModel;
+import model.StatisticModel;
+import model.UserModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -46,23 +57,94 @@ public class MainHandler {
     }
     
     @RequestMapping("/dashboard")
-    String dashboard() {
-        return "dashboard";
+    String dashboard(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "dashboard";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";
     }
     
     @RequestMapping("/statistic")
-    String statistic() {
-        return "statistic";
+    String statistic(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "statistic";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";
     }
     
     @RequestMapping("/management")
-    String management() {
-        return "management";
+    String management(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "management";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";
     }
     
-    @RequestMapping("/management-add")
-    String managementAdd() {
-        return "management-add";
+//    @RequestMapping("/management-add")
+//    String managementAdd() {
+//        return "management-add";
+//    }
+    
+    @RequestMapping("/management_user")
+    String userManagement(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "management_user";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";
+    }
+    
+    @RequestMapping("/management_point")
+    String pointManagement(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "management_point";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";
+        
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
@@ -71,16 +153,12 @@ public class MainHandler {
         try {
             String name = request.getParameter("name");
             String pass = request.getParameter("pass");
-            String token = getToken(request.getCookies());
-            if (token != null && mapToken.containsKey(token)){
-                if (token.compareTo(mapToken.get(name)) == 0){          
-                    return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-                }
-            } 
-            User user = DBConnector.Intance.getUser(name, pass);
-            if (user != null) {
-                mapToken.put(name, token);
-                response.addCookie(new Cookie(name, pass));
+            User user = UserModel.getUser(name, pass);
+            if (user != null) { 
+                String data = "OKBEDE";
+                String jwt = createJWT("id", "", data, 3600);
+                Cookie cookie = new Cookie("token", jwt);
+                response.addCookie(cookie);
                 response.setStatus(200);
                 return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
             }
@@ -93,18 +171,67 @@ public class MainHandler {
     @RequestMapping(value = "/bins", method = {RequestMethod.GET})
     ResponseEntity<String> getBins(HttpServletRequest request, HttpServletResponse response){
         String ret = "";
-        try {
-//            String token = getToken(request.getCookies());
-//            if (token != null && mapToken.containsKey(token)){
-//                if (token.compareTo(mapToken.get(name)) == 0){          
-//                }
-//            }
+        try { 
+            String token = getToken(request.getCookies());
+            Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+            if (!claims.getSubject().equals("OKBEDE")){        
+                return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, "/404").build();
+            } 
             List<Bin> list = BinModel.getListBin();
             ret = new Gson().toJson(list);
 //            o.put("bins", arr);o.to
         } catch (Exception ex) { 
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/path", method = {RequestMethod.GET})
+    ResponseEntity<String> getBinWithEndPoint(HttpServletRequest request, HttpServletResponse response){
+        String ret = "";
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            JSONObject o = new JSONObject();
+            JSONArray binArr = new JSONArray();
+            JSONArray pointArr = new JSONArray();
+            List<Bin> listBin = BinModel.getListBin();
+            List<EndPoint> listPoint = EndPointModel.getList();
+            
+            Path path = new Path();
+            path.bins = listBin;
+            path.points = listPoint;
+            o.put("bins", listBin);
+            o.put("points", listPoint);
+            ret = new Gson().toJson(path);
+//            System.out.println("ret: " + ret);
+        } catch (Exception ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/path", method = {RequestMethod.POST})
+    void putPath(@RequestBody String data){
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            JSONArray arr = new JSONArray(data);
+            DBConnector.Intance.sendPut("https://smartbin-892a5.firebaseio.com/Path.json", "");
+            for (int i = 0; i < arr.length(); i++) {
+                Integer id = arr.getInt(i);
+                DBConnector.Intance.sendPut("https://smartbin-892a5.firebaseio.com/Path/" + i + ".json", id.toString());
+            }        
+        } catch (Exception ex) { 
+        }
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
@@ -141,7 +268,7 @@ public class MainHandler {
             boolean status = Boolean.parseBoolean(request.getParameter("status"));
             int id = Integer.parseInt(request.getParameter("id"));
             ret = BinModel.updateBin(new Bin(lon, lat, status, id));
-            System.out.println("aaa: "+status);
+//            System.out.println("aaa: "+status);
         } catch (NumberFormatException ex) { 
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -161,6 +288,171 @@ public class MainHandler {
             BinModel.deleteBin(id);
         } catch (Exception ex) { 
         }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/users", method = {RequestMethod.GET})
+    ResponseEntity<String> getUser(HttpServletRequest request, HttpServletResponse response){
+        String ret = "";
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            ArrayList<User> list = UserModel.getListUser();
+            ret = new Gson().toJson(list);
+        } catch (Exception ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/users", method = {RequestMethod.POST})
+    ResponseEntity<Boolean> addUser(HttpServletRequest request, HttpServletResponse response){
+        boolean ret = false;
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String id = request.getParameter("id");
+            String name = request.getParameter("name");
+            String pass = request.getParameter("pass");
+            String email = request.getParameter("email");
+            String type = request.getParameter("type");
+            String address = request.getParameter("address");
+
+            ret = UserModel.pushUser(new User(id, name, pass, email, address, type));
+        } catch (NumberFormatException ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/users", method = {RequestMethod.PUT})
+    ResponseEntity<Boolean> updateUser(HttpServletRequest request, HttpServletResponse response){
+        boolean ret = false;
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String id = request.getParameter("id");
+            String name = request.getParameter("name");
+            String pass = request.getParameter("pass");
+            String email = request.getParameter("email");
+            String type = request.getParameter("type");
+            String address = request.getParameter("address");
+            ret = UserModel.updateUser(new User(id, name, pass, email, address, type));
+        } catch (NumberFormatException ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/users", method = {RequestMethod.DELETE})
+    void deleteUser(HttpServletRequest request, HttpServletResponse response){
+        
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String id = request.getParameter("id");
+            UserModel.deleteUser(id);
+        } catch (Exception ex) { 
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/point", method = {RequestMethod.GET})
+    ResponseEntity<String> getPoints(HttpServletRequest request, HttpServletResponse response){
+        String ret = "";
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            List<EndPoint> list = EndPointModel.getList();
+            ret = new Gson().toJson(list);
+//            o.put("bins", arr);o.to
+        } catch (Exception ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/point", method = {RequestMethod.POST})
+    ResponseEntity<Boolean> addPoint(HttpServletRequest request, HttpServletResponse response){
+        boolean ret = false;
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            double lon = Double.parseDouble(request.getParameter("lon"));
+            double lat = Double.parseDouble(request.getParameter("lat"));
+            String name = request.getParameter("name");
+            ret = EndPointModel.push(new EndPoint(lon, lat, name));
+        } catch (NumberFormatException ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/point", method = {RequestMethod.PUT})
+    ResponseEntity<Boolean> updatePoint(HttpServletRequest request, HttpServletResponse response){
+        boolean ret = false;
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            double lon = Double.parseDouble(request.getParameter("lon"));
+            double lat = Double.parseDouble(request.getParameter("lat"));
+            int id = Integer.parseInt(request.getParameter("id"));
+            String name = request.getParameter("name");
+            ret = EndPointModel.update(new EndPoint(lon, lat, id, name));
+        } catch (NumberFormatException ex) { 
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/point", method = {RequestMethod.DELETE})
+    void deletePoint(HttpServletRequest request, HttpServletResponse response){
+        
+        try {
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String id = request.getParameter("id");
+            EndPointModel.delete(id);
+        } catch (Exception ex) { 
+        }
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/chart_points", method = {RequestMethod.GET})
+    ResponseEntity<String> getChartPoint(HttpServletRequest request, HttpServletResponse response){
+        
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String data = StatisticModel.Instance.getStatsData();
+            String ret = "{\"data\": " + data + "}";
+            return new ResponseEntity<String>(ret, HttpStatus.OK) ;
     }
     
     private String createJWT(String id, String issuer, String subject, long liveTime) {
@@ -195,7 +487,7 @@ public class MainHandler {
         String token = null;
         if (cookies != null && cookies.length > 0){
             for (int i = 0; i<cookies.length; i++){
-                if (cookies[i].getValue().compareTo("token") != 0)
+                if (cookies[i].getName().compareTo("token") == 0)
                     token = cookies[i].getValue();
             }
         }

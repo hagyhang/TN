@@ -19,8 +19,10 @@ public class BaseEnity {
         try {
             Field[] fields = this.getClass().getFields();
             for(int i=0; i<fields.length - 1; i++){
-                Object o = fields[i].get(this);
-                ret += "\"" + fields[i].getName() + "\": " + "\"" + o.toString() + "\", ";
+                if (fields[i].getName() != "id"){
+                    Object o = fields[i].get(this);
+                    ret += "\"" + fields[i].getName() + "\": " + "\"" + o.toString() + "\", ";
+                }
             }
             ret += "\"" + fields[fields.length - 1].getName() + "\": " + "\"" + fields[fields.length - 1].get(this).toString() + "\"}";
         } catch (IllegalArgumentException ex) {
