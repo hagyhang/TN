@@ -77,7 +77,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";
+        return "login";
     }
     
     @RequestMapping("/statistic")
@@ -94,7 +94,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";
+        return "login";
     }
     
     @RequestMapping("/management")
@@ -111,7 +111,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";
+        return "login";
     }
     
 //    @RequestMapping("/management-add")
@@ -133,7 +133,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";
+        return "login";
     }
     
     @RequestMapping("/management_point")
@@ -150,7 +150,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";   
+        return "login";   
     }
     
     @RequestMapping("/management_task")
@@ -167,7 +167,7 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/";   
+        return "login";   
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
