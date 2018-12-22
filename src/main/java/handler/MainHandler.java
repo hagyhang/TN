@@ -25,11 +25,16 @@ import enities.User;
 import io.jsonwebtoken.Claims;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.BinModel;
+import model.DirectionModel;
+import model.EMailModel;
 import model.EndPointModel;
 import model.StatisticModel;
+import model.TaskModel;
+import model.UserLocationModel;
 import model.UserModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,6 +47,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -143,8 +150,24 @@ public class MainHandler {
             } catch (Exception e){
             }
         }
-        return "/login";
-        
+        return "/login";   
+    }
+    
+    @RequestMapping("/management_task")
+    String taskManagement(HttpServletRequest request, HttpServletResponse response) {
+        String token = getToken(request.getCookies());
+        if (token != null) {
+            try{
+                Claims claims = Jwts.parser()         
+               .setSigningKey(DatatypeConverter.parseBase64Binary("thanh"))
+               .parseClaimsJws(token).getBody();
+                if (claims.getSubject().equals("OKBEDE")){        
+                    return "management_task";
+                }
+            } catch (Exception e){
+            }
+        }
+        return "/login";   
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
@@ -165,6 +188,19 @@ public class MainHandler {
         } catch (Exception ex) { 
         }
         return new ResponseEntity<>(Boolean.FALSE, HttpStatus.OK);
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/logout")
+    String logout(HttpServletRequest request, HttpServletResponse response){
+        try {
+            Cookie cookie = new Cookie("token", "");
+            response.addCookie(cookie);
+            response.setStatus(200);
+        } catch (Exception ex) { 
+        }
+//        System.out.println("aaaaaaaaaaaaaaaa");
+        return "/login";
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
@@ -217,21 +253,46 @@ public class MainHandler {
     
     @CrossOrigin(origins = "http://localhost:5000/*")
     @RequestMapping(value = "/path", method = {RequestMethod.POST})
-    void putPath(@RequestBody String data){
+    @ResponseBody
+    ResponseEntity<Boolean> putPath(@RequestBody String data){
         try {
 //            String token = getToken(request.getCookies());
 //            if (token != null && mapToken.containsKey(token)){
 //                if (token.compareTo(mapToken.get(name)) == 0){          
 //                }
 //            }
-            JSONArray arr = new JSONArray(data);
-            DBConnector.Intance.sendPut("https://smartbin-892a5.firebaseio.com/Path.json", "");
-            for (int i = 0; i < arr.length(); i++) {
-                Integer id = arr.getInt(i);
-                DBConnector.Intance.sendPut("https://smartbin-892a5.firebaseio.com/Path/" + i + ".json", id.toString());
-            }        
+            Set<String> listBusyUser = TaskModel.getListBusyUser();
+            JSONObject obj = new JSONObject(data);
+            JSONArray arr = obj.getJSONArray("wayPoints");
+            JSONObject endPoint = obj.getJSONObject("endPoint");
+            List<JSONObject> listLocation = UserLocationModel.getListLocation();
+            int maxDistance = -1, index = -1, i = 0;
+            for (JSONObject location : listLocation) {
+                String userId = listLocation.get(i).getString("userId");
+                String raw = DirectionModel.getDirectionV2(location, endPoint, arr);
+                JSONObject o = new JSONObject(raw);
+                JSONArray legs = o.getJSONArray("routes").getJSONObject(0).getJSONArray("legs");
+                int total = 0;
+                for (int j = 0; j < legs.length(); j++) {
+                    int distance = legs.getJSONObject(j).getJSONObject("distance").getInt("value");
+                    total += distance;
+                }
+                if (!listBusyUser.contains(userId) && maxDistance < total){
+                    maxDistance = total;
+                    index = i;
+                }
+                i++;
+            }
+            if (index > -1){
+                String userId = listLocation.get(index).getString("userId");
+                TaskModel.updateTask(userId, endPoint.get("id").toString(), arr);
+                EMailModel.sendMail(userId);
+                return new ResponseEntity(true, HttpStatus.OK);
+            }          
         } catch (Exception ex) { 
+            System.out.println(ex.getMessage());
         }
+        return new ResponseEntity(false, HttpStatus.OK);
     }
     
     @CrossOrigin(origins = "http://localhost:5000/*")
@@ -323,7 +384,13 @@ public class MainHandler {
             String email = request.getParameter("email");
             String type = request.getParameter("type");
             String address = request.getParameter("address");
-
+            Set<String> listUserId = UserModel.getListUserId();
+            if (listUserId == null){
+                return new ResponseEntity<>(false, HttpStatus.OK);
+            }
+            if (listUserId.contains(id)){
+                return new ResponseEntity<>(false, HttpStatus.OK);
+            }
             ret = UserModel.pushUser(new User(id, name, pass, email, address, type));
         } catch (NumberFormatException ex) { 
         }
@@ -453,6 +520,47 @@ public class MainHandler {
             String data = StatisticModel.Instance.getStatsData();
             String ret = "{\"data\": " + data + "}";
             return new ResponseEntity<String>(ret, HttpStatus.OK) ;
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/chart_score", method = {RequestMethod.GET})
+    ResponseEntity<String> getChartScore(HttpServletRequest request, HttpServletResponse response){
+        
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            String data = StatisticModel.Instance.getChartScoreData();
+            return new ResponseEntity<String>(data, HttpStatus.OK) ;
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/task", method = {RequestMethod.GET})
+    ResponseEntity<String> getTasks(HttpServletRequest request, HttpServletResponse response){
+        
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            return new ResponseEntity<String>(TaskModel.getTasks().toString(), HttpStatus.OK) ;
+    }
+    
+    @CrossOrigin(origins = "http://localhost:5000/*")
+    @RequestMapping(value = "/task", method = {RequestMethod.DELETE})
+    ResponseEntity<Boolean> deleteTask(@RequestParam("userId") String userId, @RequestParam("isAccept") boolean isAccept){
+        
+//            String token = getToken(request.getCookies());
+//            if (token != null && mapToken.containsKey(token)){
+//                if (token.compareTo(mapToken.get(name)) == 0){          
+//                }
+//            }
+            try {
+                TaskModel.removeTask(userId, isAccept);
+                return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            } catch (Exception e){}
+            return new ResponseEntity<Boolean>(false, HttpStatus.OK);
     }
     
     private String createJWT(String id, String issuer, String subject, long liveTime) {

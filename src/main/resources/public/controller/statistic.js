@@ -25,6 +25,8 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	        text: 'Source: hagyhang'
 	    },
 	    yAxis: {
+	    	min: 0,
+	    	tickInterval: 1,
 	        title: {
 	            text: 'Number of Full Bin'
 	        }
@@ -41,18 +43,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	    },
 	    series: [{
 	        name: 'Full Bins',
-	        data: [{ 
-	        	y: 43934,
-	        	name: "1h"
-	        },
-	        { 
-	        	y: 57177,
-	        	name: "2h"
-	        },
-	        { 
-	        	y: 69658,
-	        	name: "3h"
-	        }]
+	        data: []
 	    }],
 	    plotOptions: {
 	        series: {
@@ -73,15 +64,77 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	            }
 	        }]
 	    }
-
+	});
+	var chartScore = Highcharts.chart('chartScore', {
+		chart: {
+		    animation: false,
+		    type: 'column'
+		},
+	    title: {
+	        text: 'Employee Score'
+	    },
+	    subtitle: {
+	        text: 'Source: hagyhang'
+	    },
+	    yAxis: {
+	    	min: 0,
+	    	tickInterval: 1,
+	        title: {
+	            text: 'Score'
+	        }
+	    },
+	    xAxis: {
+	    	// tickPositions: [],
+	    	type: "category"
+	    	// crosshair: true
+	    },
+	    
+	    legend: {
+	        layout: 'vertical',
+	        align: 'right',
+	        verticalAlign: 'middle'
+	    },
+	    series: [{
+	        name: 'Score',
+	        data: []
+	    }],
+	    plotOptions: {
+	        column: {
+	            pointPadding: 0.2,
+	            borderWidth: 0
+	        }
+	    },
+	    responsive: {
+	        rules: [{
+	            condition: {
+	                maxWidth: 500
+	            },
+	            chartOptions: {
+	                legend: {
+	                    layout: 'horizontal',
+	                    align: 'center',
+	                    verticalAlign: 'bottom'
+	                }
+	            }
+	        }]
+	    }
 	});
 	setInterval(updateChart, 1000);
+	setInterval(updateChartScore, 1000);
 	
 	function updateChart(){
-		console.log("???");
-		$http.get(baseUrl + "/chart_points").then((res)=>{
+		$http.get("/chart_points").then((res)=>{
 			chart.series[0].setData(res.data.data)
-			console.log(res.data.data);
+			// console.log(res.data.data);
 		});
+	}
+	function updateChartScore(){
+		$http.get("/chart_score").then((res)=>{
+			chartScore.series[0].setData(res.data)
+			console.log(res.data);
+		});
+	}
+	$scope.logout = ()=>{
+		$http.post("/logout").then((res)=>{});
 	}
 })

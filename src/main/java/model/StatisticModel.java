@@ -6,8 +6,13 @@
 package model;
 
 import common.Util;
+import database.DBConnector;
 import enities.StatPoint;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -20,6 +25,7 @@ public class StatisticModel implements Runnable{
     private int currentPos;
     private int count = 0;
     private Thread thread = new Thread(this);
+    private String URL = "https://smartbin-892a5.firebaseio.com/UserScore.json";
     public static StatisticModel Instance = new StatisticModel();
     
     private StatisticModel(){
@@ -83,12 +89,33 @@ public class StatisticModel implements Runnable{
         return ret;
     }
     
+    public String getChartScoreData(){
+        JSONArray arr = new JSONArray();
+        try {
+            String raw = DBConnector.Intance.sendGet(URL);
+            JSONObject userScores = new JSONObject(raw);
+            userScores.keySet().forEach(userId -> {
+                JSONObject score = new JSONObject();
+                score.put("y", userScores.getInt(userId));
+                String name="NULL";
+                try{
+                    name = UserModel.getUser(userId).name;
+                } catch (Exception e){
+                }
+                score.put("name", name + "\n("+userId+")");
+                arr.put(score);
+            });
+        } catch (Exception ex) {
+        }
+        return arr.toString();
+    }
+    
     public static void main(String[] args) {
 //        StatisticModel.Instance.start();
-        while (true) { 
-            System.out.println(StatisticModel.Instance.getStatsData());
-            Util.sleep(1000);
-        }
+//        while (true) { 
+            System.out.println(StatisticModel.Instance.getChartScoreData());
+//            Util.sleep(1000);
+//        }
     }
 }
 

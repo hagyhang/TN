@@ -30,17 +30,17 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	let lon, lat, map, marker, isMark = false, isAddMode = true;
 	let baseUrl = 'http://localhost:5000';
 	// let baseUrl = 'https://hagyhang.herokuapp.com';
-	let greedIcon = baseUrl + '/images/endpoint_26x26.png';
+	let greedIcon = '/images/endpoint_56x40.png';
 	$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 	let token = ConfigToken();
 	if (token != null){
-		window.location = baseUrl + "/management"
+		window.location = "/management"
 	}
 	loadPoint()
 	$scope.delete = (id)=>{
 		var r = confirm("Confirm delete this item!");
 		if (r == true) {
-			$http.delete(baseUrl + "/point?" + "id=" + id, ConfigToken()).then((res)=>{
+			$http.delete("/point?" + "id=" + id, ConfigToken()).then((res)=>{
 				loadPoint();
 			})
 		}
@@ -88,7 +88,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	$scope.OK = ()=>{
 		if (isAddMode){
 			if (isMark){
-				$http.post(baseUrl + "/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
+				$http.post("/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
 					console.log(res.data)
 					loadPoint()
 				})
@@ -96,7 +96,7 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 				alert("Add fail, missing location!")
 			}
 		} else {
-		    $http.put(baseUrl + "/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat  + "&id=" + $scope.point.id + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
+		    $http.put("/point?lon=" + $scope.point.lon + "&lat=" + $scope.point.lat  + "&id=" + $scope.point.id + "&name=" + $scope.point.name, ConfigToken()).then((res)=>{
 				console.log($scope.point.id)
 				console.log(res.data)
 				loadPoint()
@@ -139,9 +139,12 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		};
 	}
 	function loadPoint(){
-		$http.get(baseUrl + "/point", ConfigToken()).then((res)=>{
+		$http.get("/point", ConfigToken()).then((res)=>{
 			$scope.points = res.data;
 			console.log($scope.points)
 		});
+	}
+	$scope.logout = ()=>{
+		$http.post("/logout").then((res)=>{});
 	}
 })

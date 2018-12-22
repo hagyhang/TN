@@ -46,7 +46,7 @@ app.controller("dashCtrl", ($scope, $http)=>{
 		let center = {lat: 10.794103, lng: 106.6979763}
 		map = new google.maps.Map(document.getElementById('map'), {
 		  center: center,
-		  zoom: 15
+		  zoom: 12
 		});
 		map.addListener('rightclick', function(event) {
 			lon = event.latLng.lng();
@@ -67,16 +67,12 @@ app.controller("dashCtrl", ($scope, $http)=>{
 			      position: {lat: bin.lat, lng: bin.lon},
 			      map: map,
 			      icon : greedIcon,
-			      title: i + ""
+			      title: bin.id,
+			      index: i
 			    })
 			    if(bin.status != true){
 			    	marker.icon = redIcon;
 			    	let point = new google.maps.LatLng(bin.lat, bin.lon);
-			    	// console.log ("lon: " + bin.lon + " - lat: " + bin.lat);
-				    // wayPoints.push({
-				    //     location: point,
-				    //     stopover: true
-				    // });
 				    waypointsIndex.push(i);
 			    }
 			    markers.push(marker);
@@ -86,7 +82,7 @@ app.controller("dashCtrl", ($scope, $http)=>{
 			    minY = minY < bin.lon ? minY : bin.lon;
 			    
 			    marker.addListener('click', function() {
-			    	markerIndex = this.title;
+			    	markerIndex = this.index;
 			    	let isAdd = true;
 			    	for (let i=0; i<listId.length; i++){
 			    		if (listId[i] == markerIndex){
@@ -138,28 +134,29 @@ app.controller("dashCtrl", ($scope, $http)=>{
 			}
 			center = new google.maps.LatLng((maxX + minX)/2, (maxY + minY)/2);
 		    map.panTo(center);
-			// console.log(wayPoints);
 		})
-	 	// console.log(markers);
-	  //   setInterval(function(){
-	  //   	$http.get("http://localhost:5000/bins").then((res)=>{
-			// 	let bins = res.data;
-			// 	// console.log(bins);
-			// 	for (let i=0; i<bins.length; i++){
-			// 		let bin = bins[i];
-			// 		if(bin.status != true)
-			// 	    	markers[i].icon = redIcon;
-			// 	    else
-			// 	    	markers[i].icon = greedIcon;
-			// 	    markers[i].icon = greedIcon;
-
-			// 	}
-			// 	for (var i=0; i<markers.length; i++) {
-			//         markers[i].setMap(map);
-			//     }
-			// 	// console.log(markers);
-			// })
-	  //   }, 2000);
+		//reload bin
+	    setInterval(function(){
+	    	$http.get("http://localhost:5000/bins").then((res)=>{
+				let bins = res.data;
+				for (let i=0; i<bins.length; i++){
+					let bin = bins[i];
+					if(bin.status != true) {
+						if (listId.indexOf(i) > -1)
+				    		markers[i].setIcon(redIconChoosed);
+				    	else 
+				    		markers[i].setIcon(redIcon);
+					}
+				    else {
+				    	if (listId.indexOf(i) > -1)
+				    		markers[i].setIcon(greedIconChoosed);
+				    	else 
+				    		markers[i].setIcon(greedIcon);
+				    }
+				}
+				$scope.bins = bins;
+			})
+	    }, 2000);
 	}, 1000);
 	function updateListId(){
 		let str = "";
@@ -249,18 +246,27 @@ app.controller("dashCtrl", ($scope, $http)=>{
           }
         });
 	}
-	$scope.sendMail = ()=>{
-		if (listId.length==0 || !isStartSet || endPointId == -1){
-			alert("Choose Waypoints, Start Point and End Point by click on map!")
+	$scope.notify = ()=>{
+		if (listId.length==0 || endPointId == -1){
+			alert("Choose Waypoints and End Point by click on map!")
 			return;
 		}
-		let data = [];
+		let listBin = [];
 		for (let i=0; i<listId.length; i++){
 			let bin = $scope.bins[listId[i]];
-			data.push(bin.id);
+			listBin.push(bin);
+		}
+		let data = {
+			wayPoints: listBin,
+			endPoint: $scope.points[endPointId]
 		}
 		$http.post("/path", data).then((res)=>{
-
+			result = res.data;
+			if (res.data == true){
+				alert("Success!");
+			} else {
+				alert("Employeer is busy!");
+			}
 		});
 	}
 	$scope.rightClick = (e)=>{	
@@ -289,5 +295,8 @@ app.controller("dashCtrl", ($scope, $http)=>{
 		marker.setMap(map);
 		start = new google.maps.LatLng(lat, lon);
 		isStartSet = true;
+	}
+	$scope.logout = ()=>{
+		$http.get("/logout").then((res)=>{});
 	}
 })

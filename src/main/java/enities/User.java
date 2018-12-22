@@ -32,6 +32,15 @@ public class User extends BaseEnity{
         this.type = type;
         
     }
+    
+    public User (String id, JSONObject o){
+        this.id = id;
+        this.name = o.getString("name");
+        this.email = o.getString("email");
+        this.address = o.getString("address");
+        this.type = o.getString("type");
+        
+    }
 
     public User() {
     }

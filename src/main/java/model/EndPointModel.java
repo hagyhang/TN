@@ -78,12 +78,18 @@ public class EndPointModel {
     }
     
     public static void main(String[] args) {
-        List<EndPoint> list = getList();
-        list.forEach(bin -> {
-            System.out.println("lon: " + bin.lon + " - lat: " + bin.lat);
-        });
-        System.out.println(new Gson().toJson(list));
+//        List<EndPoint> list = getList();
+//        list.forEach(bin -> {
+//            System.out.println("lon: " + bin.lon + " - lat: " + bin.lat);
+//        });
+//        System.out.println(new Gson().toJson(list));
 //        push(new EndPoint(Util.getID(), , 0))
 //        deleteBin("123");
+        push(new EndPoint(106.69970372642456, 10.79606291933109, "Bai rac Quan Binh Thanh"));
+        push(new EndPoint(106.70581241608272, 10.78994636847177, "Bai rac Quan 1"));  
+        
+        push(new EndPoint(106.69970372642456, 10.79606291933109, "Bai rac Quan Binh Thanh"));
+        push(new EndPoint(106.70581241608272, 10.78994636847177, "Bai rac Quan 1"));
+        push(new EndPoint(106.69970372642456, 10.79606291933109, "Bai rac Quan Binh Thanh"));
     }
 }

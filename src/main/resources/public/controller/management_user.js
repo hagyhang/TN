@@ -19,17 +19,17 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 	};
 	let baseUrl = 'http://localhost:5000';
 	// let baseUrl = 'https://hagyhang.herokuapp.com';
-	let greedIcon = baseUrl + '/images/green_bin_26x26.png';
+	let greedIcon = '/images/green_bin_26x26.png';
 	$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 	let token = ConfigToken();
 	if (token != null){
-		window.location = baseUrl + "/management"
+		window.location = "/management"
 	}
 	load()
 	$scope.delete = (id)=>{
 		var r = confirm("Confirm delete this item!");
 		if (r == true) {
-			$http.delete(baseUrl + "/users?" + "id=" + id, ConfigToken()).then((res)=>{
+			$http.delete("/users?" + "id=" + id, ConfigToken()).then((res)=>{
 				load();
 			})
 		}
@@ -47,9 +47,13 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		isAddMode = true;
 	}
 	$scope.OK = ()=>{
-		$http.post(baseUrl + "/users?id=" + $scope.user.id + "&pass=" + $scope.user.pass + "&name=" + $scope.user.name + "&address=" + $scope.user.address + "&type=" + $scope.user.type + "&email=" + $scope.user.email, ConfigToken()).then((res)=>{
-			console.log(res.data)
-			load()
+		$http.post( "/users?id=" + $scope.user.id + "&pass=" + $scope.user.pass + "&name=" + $scope.user.name + "&address=" + $scope.user.address + "&type=" + $scope.user.type + "&email=" + $scope.user.email, ConfigToken()).then((res)=>{
+			if (res.data == true){
+				alert("Success!");
+				load();
+			} else{
+				alert("User already existed!!")
+			}
 		})
 	}
 	$scope.closePopup = ()=>{
@@ -63,9 +67,12 @@ app.controller("mainCtrl", ($scope, $location, $http)=>{
 		};
 	}
 	function load(){
-		$http.get(baseUrl + "/users", ConfigToken()).then((res)=>{
+		$http.get("/users", ConfigToken()).then((res)=>{
 			$scope.users = res.data;
 			console.log($scope.users)
 		});
+	}
+	$scope.logout = ()=>{
+		$http.post("/logout").then((res)=>{});
 	}
 })

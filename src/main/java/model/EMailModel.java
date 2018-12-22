@@ -1,6 +1,9 @@
 package model;
 
+import enities.User;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.*;
 import javax.mail.internet.*;
 /**
@@ -24,6 +27,14 @@ public class EMailModel {
         sendFromGMail(from, pass, to, subject, body);
     }
 
+    public static void sendMail(String userId){
+        try {
+            User user = UserModel.getUser(userId);
+            String[] to = { user.email };
+            sendFromGMail(USER_NAME, PASSWORD, to, "Your Task", "Check your phone to do this task");
+        } catch (Exception ex) {}
+    }
+    
     private static void sendFromGMail(String from, String pass, String[] to, String subject, String body) {
         Properties props = System.getProperties();
         String host = "smtp.gmail.com";

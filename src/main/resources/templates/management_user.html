@@ -13,6 +13,23 @@
         <link rel="stylesheet" href="css/material-design-iconic-font.min.css"> 
     </head>
     <body ng-app="mainApp" ng-controller="mainCtrl">
+    	<div class="row">
+            <div class="col-xs-3"></div>
+            <div class="col-xs-6 text-center"></div>
+            <div class="col-xs-3 text-right">
+              <div class="dropdown"> 
+                <a href="#" class="dropdown-toggle mr15" id="acc-dropdown" data-toggle="dropdown" aria-expanded="false"> 
+                    <i class="zmdi zmdi-account zmdi-hc-lg"></i>
+                    <span class="hidden-sm hidden-xs ml5">manager</span> <span class="caret"></span> 
+                </a>
+                <ul class="dropdown-menu mt5 mr5 dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <li>
+                        <a class="dropdown-item" ng-click="logout()"><i class="zmdi zmdi-power mr5"></i>Logout</a>
+                    </li>
+                </ul>
+              </div>
+            </div>
+        </div>
         <div id="wrapper"> 
             <!-- Sidebar -->
             <div id="sidebar-wrapper">
@@ -25,6 +42,7 @@
                         <li><a href="management"><i class="zmdi zmdi-circle"></i>BIN</a></li>
                         <li><a href="management_point"><i class="zmdi zmdi-circle"></i>END POINT</a></li>
                         <li><a href="management_user"><i class="zmdi zmdi-circle"></i>USER</a></li>
+                        <li><a href="management_task"><i class="zmdi zmdi-circle"></i>TASK</a></li>
                     </div>
                 </ul>
             </div>
@@ -122,8 +140,8 @@
 		                    	<div class="input-place">
 			                        <label>Type:</label>
 		                            <select class="form-control" ng-model="user.type">
-		                                <option value="true">EMPLOYEE</option>
-		                                <option value="false">MANAGER</option>
+		                                <option value="EMPLOYEE">EMPLOYEE</option>
+		                                <option value="MANAGER">MANAGER</option>
 		                            </select>
 		                    	</div>
 		                    </div>
